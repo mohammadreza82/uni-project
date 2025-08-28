@@ -9,7 +9,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { SharedModule } from '../../shared/shared.module';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { ProfileService } from '../../services/theme/profile.service';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -46,7 +46,6 @@ export class ProfileComponent implements OnInit {
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       profile_image: [null],
-      
     });
 
     this.passwordForm = this.fb.group(
@@ -58,22 +57,23 @@ export class ProfileComponent implements OnInit {
       { validator: this.passwordMatchValidator }
     );
   }
-ngOnInit(): void {
-  this.loadProfileData();
 
-  // subscribe to user info updates
-  this.profileService.userInfo$.subscribe((user) => {
-    if (user) {
-      this.profileData = user;
-      this.amount = parseFloat(user.amount) || 0;
+  ngOnInit(): void {
+    this.loadProfileData();
 
-      this.profileForm.patchValue({
-        username: user.username,
-        email: user.email,
-      });
-    }
-  });
-}
+    // subscribe to user info updates
+    this.profileService.userInfo$.subscribe((user) => {
+      if (user) {
+        this.profileData = user;
+        this.amount = parseFloat(user.amount) || 0;
+
+        this.profileForm.patchValue({
+          username: user.username,
+          email: user.email,
+        });
+      }
+    });
+  }
 
   passwordMatchValidator(form: FormGroup) {
     const newPassword = form.get('new_password')?.value;
@@ -87,53 +87,49 @@ ngOnInit(): void {
     }
   }
 
-loadProfileData(): void {
-  this.isLoading = true;
-  this.profileService.getProfileText().subscribe({
-    next: (response: string) => {
-      console.log('Raw response:', response);
+  loadProfileData(): void {
+    this.isLoading = true;
+    this.profileService.getProfileText().subscribe({
+      next: (response: string) => {
+        console.log('Raw response:', response);
 
-      try {
-        const data = JSON.parse(response); // اگر JSON بود
-        this.profileData = data;
-        this.amount = parseFloat(data.amount) || 0;
-        this.profileForm.patchValue({
-          username: data.username,
-          email: data.email,
-        });
-      } catch (e) {
-        console.error('Response is not JSON:', e);
-        this.message.error('پاسخ سرور معتبر نیست');
-      }
+        try {
+          const data = JSON.parse(response); // if JSON
+          this.profileData = data;
+          this.amount = parseFloat(data.amount) || 0;
+          this.profileForm.patchValue({
+            username: data.username,
+            email: data.email,
+          });
+        } catch (e) {
+          console.error('Response is not JSON:', e);
+          this.message.error('Invalid server response');
+        }
 
-      this.isLoading = false;
-    },
-    error: (error) => {
-      console.error('Error loading profile:', error);
-      this.isLoading = false;
-      this.message.error('خطا در بارگذاری پروفایل');
-    },
-  });
-}
-
-
-handleFileChange(event: any): void {
-  const file = event.target.files[0];
-  if (file) {
-    this.profileForm.patchValue({ profile_image: file });
-    this.profileForm.get('profile_image')?.updateValueAndValidity();
-    this.profileForm.markAsDirty();
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.profileData.profile_image = reader.result as string; // فقط برای نمایش
-    };
-    reader.readAsDataURL(file);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.isLoading = false;
+        this.message.error('Error loading profile');
+      },
+    });
   }
-}
 
+  handleFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.profileForm.patchValue({ profile_image: file });
+      this.profileForm.get('profile_image')?.updateValueAndValidity();
+      this.profileForm.markAsDirty();
 
-
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.profileData.profile_image = reader.result as string; // only for preview
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
   saveChanges(): void {
     if (this.profileForm.valid) {
@@ -142,26 +138,26 @@ handleFileChange(event: any): void {
       const formData = new FormData();
       formData.append('username', this.profileForm.get('username')?.value);
       formData.append('email', this.profileForm.get('email')?.value);
-      
+
       if (this.profileForm.get('profile_image')?.value) {
         formData.append('profile_image', this.profileForm.get('profile_image')?.value);
       }
-      
+
       this.profileService.updateProfile(formData).subscribe({
         next: (response) => {
           this.profileData = response;
           this.amount = parseFloat(response.amount) || 0;
 
-          // بروزرسانی BehaviorSubject
+          // update BehaviorSubject
           this.profileService.loadUserProfile();
 
           this.isLoading = false;
-          this.message.success('پروفایل با موفقیت بروزرسانی شد');
+          this.message.success('Profile updated successfully');
         },
         error: (error) => {
           console.error('Error updating profile:', error);
           this.isLoading = false;
-          this.message.error('خطا در بروزرسانی پروفایل');
+          this.message.error('Error updating profile');
         },
       });
     }
@@ -180,14 +176,14 @@ handleFileChange(event: any): void {
       this.profileService.changePassword(passwordData).subscribe({
         next: (response) => {
           this.passwordChangeSuccess = true;
-          this.passwordChangeMessage = response.detail || 'رمز عبور با موفقیت تغییر یافت';
+          this.passwordChangeMessage = response.detail || 'Password changed successfully';
           this.passwordForm.reset();
           this.isChangingPassword = false;
           this.message.success(this.passwordChangeMessage);
         },
         error: (error) => {
           this.passwordChangeSuccess = false;
-          this.passwordChangeMessage = error.error?.detail || 'خطا در تغییر رمز عبور';
+          this.passwordChangeMessage = error.error?.detail || 'Error changing password';
           this.isChangingPassword = false;
           this.message.error(this.passwordChangeMessage);
         },

@@ -27,6 +27,7 @@ export const environment = {
       `/api/students/course/reserve/${courseId}/`,
     cancel: (reservationId: number | string) =>
       `/api/students/course/cancel/${reservationId}/`,
+    get: '/api/students/courses/'
   },
 
   dashboard: {

@@ -55,18 +55,22 @@ export class AuthService {
     this.userProfileSubject.next(null);
   }
 
-  refreshToken(): Observable<any> {
-    const refresh = localStorage.getItem('refresh_token');
-    if (!refresh) return throwError(() => new Error('No refresh token'));
+refreshToken(): Observable<any> {
+  const refresh = localStorage.getItem('refresh_token');
+  if (!refresh) return throwError(() => new Error('No refresh token'));
 
-    return this.http.post(this.API_REFRESH, { refresh }).pipe(
-      tap((res: any) => {
-        if (res.access) {
-          localStorage.setItem('token', res.access);
-        }
-      })
-    );
-  }
+  return this.http.post(this.API_REFRESH, { refresh }).pipe(
+    tap((res: any) => {
+      if (res.access) {
+        localStorage.setItem('token', res.access);
+      }
+      if (res.refresh) {
+        localStorage.setItem('refresh_token', res.refresh); // درصورتی که بک‌اند refresh جدید هم بده
+      }
+    })
+  );
+}
+
 
   getProfile(): Observable<any> {
     return this.http.get(this.API_ME);

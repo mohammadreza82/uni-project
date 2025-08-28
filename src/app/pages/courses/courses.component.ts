@@ -1,32 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CourseReserveService } from '../../services/course-reserve.service';
 import { CommonModule } from '@angular/common';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { SharedModule } from '../../shared/shared.module';
 
 @Component({
   selector: 'app-courses',
-  imports: [CommonModule],
+  imports: [CommonModule, SharedModule],
   templateUrl: './courses.component.html',
-  styleUrl: './courses.component.scss'
+  styleUrls: ['./courses.component.scss']
 })
 export class CoursesComponent implements OnInit {
   courses: any[] = [];
   isLoading = false;
   errorMessage = '';
-  constructor(private courseService: CourseReserveService) {}
+
+  constructor(
+    private courseService: CourseReserveService,
+    private message: NzMessageService
+  ) {}
 
   ngOnInit(): void {
     this.loadCourses();
   }
+
   loadCourses(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     this.courseService.getCourses().subscribe({
       next: (res) => {
-        this.courses = res;
         this.isLoading = false;
-        console.log(res);
-        
+        // فرض: آرایه دوره‌ها، فیلد reserved و reservationId رو اضافه می‌کنیم
+        this.courses = res.map((course: any) => ({
+          ...course,
+          reserved: false,
+          reservationId: null
+        }));
       },
       error: (err) => {
         console.error('Error fetching courses:', err);
@@ -37,25 +47,45 @@ export class CoursesComponent implements OnInit {
   }
 
   reserve(courseId: number | string) {
+    const course = this.courses.find(c => c.id === courseId);
+    if (!course) return;
+
     this.courseService.reserveCourse(courseId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log('Course reserved successfully:', res);
-        this.loadCourses(); 
+        course.reserved = true;
+        course.reservationId = res.reservation_id;
+        this.message.success('Course reserved successfully!');
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error reserving course:', err);
+        if (err.error?.detail) {
+          this.message.error(err.error.detail);
+        } else {
+          this.message.error('Failed to reserve course. Please try again.');
+        }
       }
     });
   }
 
   cancelReservation(reservationId: number | string) {
+    const course = this.courses.find(c => c.reservationId === reservationId);
+    if (!course) return;
+
     this.courseService.cancelReservation(reservationId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log('Reservation canceled:', res);
-        this.loadCourses();
+        course.reserved = false;
+        course.reservationId = null;
+        this.message.success('Reservation canceled and refunded!');
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error canceling reservation:', err);
+        if (err.error?.detail) {
+          this.message.warning(err.error.detail);
+        } else {
+          this.message.error('Failed to cancel reservation. Please try again.');
+        }
       }
     });
   }

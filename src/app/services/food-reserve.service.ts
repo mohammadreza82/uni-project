@@ -1,43 +1,45 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../environments/environment';
+import { ProfileService } from './profile.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FoodReserveService {
-  private API_RESERVE_FOOD = environment.baseUrl + environment.food.reserve;
-  private API_CANCEL_FOOD = environment.baseUrl + environment.food.cancel;
   private API_GET_FOODSLIST = environment.baseUrl + environment.food.get;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private profileService: ProfileService) {}
 
-  // getFoods با Authorization header
+  private getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return { Authorization: `Bearer ${token}` };
+  }
+
   getFoods(): Observable<any> {
-    const token = localStorage.getItem('token'); // گرفتن توکن
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.get(this.API_GET_FOODSLIST, { headers });
+    return this.http.get(this.API_GET_FOODSLIST, { headers: this.getAuthHeaders() });
   }
 
   reserveFood(foodId: number | string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.post(this.API_RESERVE_FOOD, { foodId }, { headers });
+    const url = environment.baseUrl + environment.food.reserve(foodId);
+    return this.http.post(url, {}, { headers: this.getAuthHeaders() }).pipe(
+      tap((res: any) => {
+        if (res.new_amount !== undefined) {
+          this.profileService.updateAmount(res.new_amount); // ← اینجا اپدیت می‌کنیم
+        }
+      })
+    );
   }
 
   cancelReservation(reservationId: number | string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.post(this.API_CANCEL_FOOD, { reservationId }, { headers });
+    const url = environment.baseUrl + environment.food.cancel(reservationId);
+    return this.http.post(url, {}, { headers: this.getAuthHeaders() }).pipe(
+      tap((res: any) => {
+        if (res.new_amount !== undefined) {
+          this.profileService.updateAmount(res.new_amount); // ← اینجا هم اپدیت
+        }
+      })
+    );
   }
 }

@@ -104,66 +104,64 @@ export class AuthPageComponent {
   }
 
   // Submit Full Registration Form
-// Submit Full Registration Form
-submitRegisterForm(): void {
-  const { username, password, email, profileimg } = this.registerForm;
+  submitRegisterForm(): void {
+    const { username, password, email, profileimg } = this.registerForm;
 
-  if (!username || !password || !email) {
-    this.message.show('warning', 'Please complete all required fields!');
-    return;
-  }
+    if (!username || !password || !email) {
+      this.message.show('warning', 'Please complete all required fields!');
+      return;
+    }
 
-  this.loading = true;
+    this.loading = true;
 
-  // اگر تصویر انتخاب شده بود، به Base64 تبدیلش می‌کنیم
-  if (profileimg) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64Image = reader.result as string;
+    if (profileimg) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Image = reader.result as string;
 
-      const payload = {
-        username,
-        password,
-        email,
-        profileimg: base64Image 
+        const payload = {
+          username,
+          password,
+          email,
+          profileimg: base64Image 
+        };
+
+        this.sendRegister(payload);
       };
-
+      reader.readAsDataURL(profileimg);
+    } else {
+      const payload = { username, password, email };
       this.sendRegister(payload);
-    };
-    reader.readAsDataURL(profileimg);
-  } else {
-    const payload = { username, password, email };
-    this.sendRegister(payload);
+    }
   }
-}
 
-private sendRegister(payload: any) {
-  console.log('📤 Sending JSON:', payload);
+  private sendRegister(payload: any) {
+    console.log('📤 Sending JSON:', payload);
 
-  this.authService.register(payload).subscribe({
-    next: (res) => {
-      console.log('✅ Server response:', res);
-      this.message.show('success', 'Registration successful!');
-      this.loading = false;
+    this.authService.register(payload).subscribe({
+      next: (res) => {
+        console.log('✅ Server response:', res);
+        this.message.show('success', 'Registration successful!');
+        this.loading = false;
 
-      if (res.access && res.refresh) {
-        localStorage.setItem('access_token', res.access);
-        localStorage.setItem('refresh_token', res.refresh);
-      }
+        if (res.access && res.refresh) {
+          localStorage.setItem('access_token', res.access);
+          localStorage.setItem('refresh_token', res.refresh);
+        }
 
-      this.isActive = false;
-      // this.toggleActive()
-      // this.router.navigate(['/dashboard']);
-    },
-    error: (err) => {
-      console.log('❌ Error:', err);
-      this.message.show('error', err.error?.detail || 'Registration failed');
-      this.loading = false;
-    },
-  });
-}
-
-
+        this.isActive = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.log('❌ Error:', err);
+        
+        const errorMessage = this.getErrorMessage(err);
+        this.message.show('error', errorMessage);
+        
+        this.loading = false;
+      },
+    });
+  }
 
   // Login
   handleLogin() {
@@ -181,7 +179,6 @@ private sendRegister(payload: any) {
         if (response) {
           console.log('Login successful, received response:', response);
           
-          // ذخیره توکن‌ها
           if (response.access && response.refresh) {
             localStorage.setItem('access_token', response.access);
             localStorage.setItem('refresh_token', response.refresh);
@@ -191,11 +188,82 @@ private sendRegister(payload: any) {
           this.router.navigate(['/dashboard']);
         }
       },
-      error: err => {
-        console.log(err);
-        this.message.show('error', err.error?.detail || 'Login failed');
+      error: (err) => {
+        console.log('❌ Login error:', err);
+        
+        const errorMessage = this.getErrorMessage(err);
+        this.message.show('error', errorMessage);
+        
         this.isLoading = false;
       }
     });
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.error) {
+      if (error.error.detail) {
+        return error.error.detail;
+      }
+      
+      if (error.error.username) {
+        return Array.isArray(error.error.username) 
+          ? error.error.username.join(', ') 
+          : error.error.username;
+      }
+      
+      if (error.error.email) {
+        return Array.isArray(error.error.email) 
+          ? error.error.email.join(', ') 
+          : error.error.email;
+      }
+      
+      if (error.error.password) {
+        return Array.isArray(error.error.password) 
+          ? error.error.password.join(', ') 
+          : error.error.password;
+      }
+      
+      if (error.error.error && typeof error.error.error === 'string') {
+        return error.error.error;
+      }
+      
+      if (Array.isArray(error.error) && error.error.length > 0) {
+        return error.error[0];
+      }
+      
+      if (error.error.message) {
+        return error.error.message;
+      }
+      
+      if (typeof error.error === 'string') {
+        return error.error;
+      }
+    }
+    
+    if (error.status === 0) {
+      return 'Network error: Please check your internet connection';
+    }
+    
+    if (error.status === 400) {
+      return 'Bad request: Please check your input data';
+    }
+    
+    if (error.status === 401) {
+      return 'Unauthorized: Invalid credentials';
+    }
+    
+    if (error.status === 403) {
+      return 'Forbidden: Access denied';
+    }
+    
+    if (error.status === 404) {
+      return 'Not found: The requested resource was not found';
+    }
+    
+    if (error.status >= 500) {
+      return 'Server error: Please try again later';
+    }
+    
+    return 'An unexpected error occurred. Please try again.';
   }
 }

@@ -3,6 +3,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { SharedModule } from '../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { DepositService } from '../../services/deposit.service';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-deposit',
@@ -16,8 +17,9 @@ export class DepositComponent {
 
   constructor(
     private message: NzMessageService,
-    private depositService: DepositService
-  ) {}
+    private depositService: DepositService,
+    private profileService: ProfileService
+  ) { }
 
   deposit() {
     if (!this.amount || this.amount <= 0) {
@@ -33,6 +35,10 @@ export class DepositComponent {
         this.message.success(res.detail || 'Deposit successful');
         this.amount = null;
         console.log('New balance:', res.new_amount);
+
+        if (res.new_amount !== undefined) {
+          this.profileService.updateAmount(res.new_amount.toString());
+        }
       },
       error: (err) => {
         this.isLoading = false;

@@ -14,6 +14,9 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { AuthService } from '../../services/authentication/auth.service';
+import { FoodReserveService } from '../../services/food-reserve.service';
+import { ProfileService } from '../../services/profile.service';
+
 
 @Component({
   selector: 'app-main-layout',
@@ -34,23 +37,24 @@ import { AuthService } from '../../services/authentication/auth.service';
 
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
+  amount: string | null = null;
   isCollapsed = false;
   isMobile = false;
   isDrawerOpen = false;
   private breakpointSubscription!: Subscription;
-  userProfileImage: string = '/assets/avatars/default-profile.png'; 
+  userProfileImage: string = '/assets/avatars/default-profile.png';
   userName: string = '';
   private profileSub: Subscription | null = null;
 
-  constructor(private breakpointObserver: BreakpointObserver, public themeService: ThemeService,private sidebarService: SidebarService,private router:Router,
-    private authService: AuthService) { 
+  constructor(private breakpointObserver: BreakpointObserver, public themeService: ThemeService, private sidebarService: SidebarService, private router: Router,
+    private authService: AuthService,private profileService: ProfileService) {
     this.checkScreenSize();
     this.sidebarService.isMobile$.subscribe(
       (isMobile) => (this.isMobile = isMobile)
     );
   }
 
-  
+
 
   onResize(event: Event): void {
     this.checkScreenSize();
@@ -81,22 +85,31 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   loadProfile(): void {
     this.authService.getProfile().subscribe(
       (response) => {
-        console.log('Profile data:', response); 
-        this.userProfileImage = response.profile_image || this.userProfileImage; 
-        this.userName = response.username || response.full_name || ''; 
+        console.log('Profile data:', response);
+        this.userProfileImage = response.profile_image || this.userProfileImage;
+        this.userName = response.username || response.full_name || '';
       },
       (error) => {
         console.error('Error loading profile:', error);
       }
     );
   }
-  loadUserProfile(): void {
-    this.profileSub = this.authService.userInfo$.subscribe((profile) => {
-      if (profile) {
-        this.userProfileImage = profile.profile_image || null;
-        this.userName = profile.username || null;
+ loadUserProfile(): void {
+    // استفاده از profileImage$ از ProfileService
+    this.profileSub = this.profileService.profileImage$.subscribe((imageUrl) => {
+      if (imageUrl) {
+        this.userProfileImage = imageUrl;
       }
     });
+
+    // همچنین اطلاعات کاربر از userInfo$
+    this.profileSub.add(
+      this.profileService.userInfo$.subscribe((profile) => {
+        if (profile) {
+          this.userName = profile.username || '';
+        }
+      })
+    );
   }
   ngOnInit(): void {
     this.breakpointSubscription = this.breakpointObserver
@@ -108,8 +121,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           this.isDrawerOpen = false;
         }
       });
-      this.loadProfile();
-      this.loadUserProfile();
+    this.loadProfile();
+    this.loadUserProfile();
+
+     this.profileService.amount$.subscribe((val) => {
+      this.amount = val;
+    });
   }
   ngOnDestroy(): void {
     if (this.breakpointSubscription) {
