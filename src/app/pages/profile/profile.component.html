@@ -1,0 +1,156 @@
+<div class="mx-auto max-w-3xl">
+  <!-- Profile Container -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
+    <!-- Profile Header -->
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">
+      Profile Information
+    </h1>
+
+    <!-- Profile Picture Section -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="relative mb-4">
+        <div class="w-40 h-40 rounded-full overflow-hidden border-2 border-blue-500 dark:border-blue-400 shadow-md">
+          <img
+            [src]="profileData.profile_image || 'assets/images/default-avatar.png'"
+            alt="Profile Picture"
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+      <label class="cursor-pointer text-blue-600 dark:text-blue-400 font-medium hover:underline">
+        <input
+          type="file"
+          class="hidden"
+          accept="image/*"
+          (change)="handleFileChange($event)"
+        />
+        Change Profile Picture
+      </label>
+    </div>
+
+    <!-- Profile Form -->
+    <form [formGroup]="profileForm" (ngSubmit)="saveChanges()" class="space-y-6">
+      <!-- Username and Email (Two Columns) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Username</label>
+          <input
+            formControlName="username"
+            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
+            placeholder="Enter your username"
+          />
+          <div *ngIf="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
+               class="text-red-500 text-xs mt-1">
+            Please enter a valid username
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Email</label>
+          <input
+            formControlName="email"
+            type="email"
+            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
+            placeholder="Enter your email"
+          />
+          <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+               class="text-red-500 text-xs mt-1">
+            Please enter a valid email address
+          </div>
+        </div>
+      </div>
+
+      <!-- Amount Section -->
+      <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          Amount: <span>{{ amount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </h3>
+      </div>
+
+      <!-- Save Button -->
+      <div class="flex justify-end mt-8">
+        <button
+          type="submit"
+          [disabled]="!profileForm.valid || !profileForm.dirty || isLoading"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+        >
+          <span *ngIf="isLoading" class="mr-2">
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          <span>{{ isLoading ? 'Saving...' : 'Save Changes' }}</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Change Password Section -->
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-8 mt-8">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">Change Password</h2>
+
+      <!-- Password Change Message -->
+      <div *ngIf="passwordChangeMessage"
+           [class]="passwordChangeSuccess ? 'bg-green-100 text-green-700 p-3 rounded-md mb-4' : 'bg-red-100 text-red-700 p-3 rounded-md mb-4'">
+        {{ passwordChangeMessage }}
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-4">
+        <div class="form-group">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Current Password</label>
+          <input
+            formControlName="old_password"
+            type="password"
+            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
+            placeholder="Enter your current password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">New Password</label>
+          <input
+            formControlName="new_password"
+            type="password"
+            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
+            placeholder="Enter your new password"
+          />
+          <div *ngIf="passwordForm.get('new_password')?.invalid && passwordForm.get('new_password')?.touched"
+               class="text-red-500 text-xs mt-1">
+            Password must be at least 6 characters long
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Confirm New Password</label>
+          <input
+            formControlName="confirm_password"
+            type="password"
+            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
+            placeholder="Confirm your new password"
+          />
+          <div *ngIf="passwordForm.get('confirm_password')?.errors?.['mismatch'] && passwordForm.get('confirm_password')?.touched"
+               class="text-red-500 text-xs mt-1">
+            Passwords do not match
+          </div>
+        </div>
+
+        <!-- Change Password Button -->
+        <div class="flex justify-end mt-4">
+          <button
+            type="submit"
+            [disabled]="!passwordForm.valid || isChangingPassword"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            <span *ngIf="isChangingPassword" class="mr-2">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span>{{ isChangingPassword ? 'Changing...' : 'Change Password' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
