@@ -14,7 +14,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
   {
     path: 'auth',
-    // component: AuthPageComponent,
+    component: AuthPageComponent,
     children: [
       { path: 'login', component: AuthPageComponent, data: { mode: 'login' } },
       { path: 'register', component: AuthPageComponent, data: { mode: 'register' } },
@@ -24,9 +24,9 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [authGuard],
+    canActivate: [authGuard],
     children: [
-  
+
       { path: 'dashboard', component: DashboardComponent },
       { path: 'deposit', component: DepositComponent },
       { path: 'food-reserve', component: FoodReserveComponent },

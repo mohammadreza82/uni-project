@@ -58,16 +58,6 @@
           />
           <span nz-icon nzType="user" nzTheme="outline"></span>
         </div>
-        <!-- <div class="input-box">
-          <input
-            type="text"
-            name="full_name"
-            placeholder="full name"
-            required
-            [(ngModel)]="registerForm.full_name"
-          />
-          <span nz-icon nzType="borderless-table" nzTheme="outline"></span>
-        </div> -->
         <div class="input-box">
           <input
             type="email"
@@ -89,9 +79,15 @@
           <span nz-icon nzType="lock" nzTheme="outline"></span>
         </div>
         <div class="flex gap-x-2">
-       <button type="button" class="btn" nz-button nzType="primary" (click)="addProfile()">
-  Add profile pic
-</button>
+          <button
+            type="button"
+            class="btn"
+            nz-button
+            nzType="primary"
+            (click)="addProfile()"
+          >
+            Add profile pic
+          </button>
           <button type="submit" class="btn" nz-button nzType="primary">
             Register
           </button>

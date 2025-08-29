@@ -95,14 +95,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     );
   }
  loadUserProfile(): void {
-    // استفاده از profileImage$ از ProfileService
     this.profileSub = this.profileService.profileImage$.subscribe((imageUrl) => {
       if (imageUrl) {
         this.userProfileImage = imageUrl;
       }
     });
 
-    // همچنین اطلاعات کاربر از userInfo$
     this.profileSub.add(
       this.profileService.userInfo$.subscribe((profile) => {
         if (profile) {

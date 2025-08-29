@@ -60,14 +60,13 @@ export class ProfileService {
     const token = localStorage.getItem('token');
     return this.http.get(this.API_ME, {
       headers: { Authorization: `Bearer ${token}` },
-      responseType: 'text', // مهم!
+      responseType: 'text', 
     });
   }
 
 updateProfile(profileData: FormData): Observable<any> {
   return this.http.put(this.API_UPDATE_PROFILE, profileData, {
-    headers: this.getAuthHeaders()  // فقط هدر توکن
-    // دقت کن: Content-Type رو عمداً نمی‌زنیم
+    headers: this.getAuthHeaders()  
   });
 }
 

@@ -18,7 +18,6 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // فراخوانی دستی loadUserProfile در کامپوننت اصلی
   loadUserProfile(): void {
     this.getProfile().subscribe({
       next: (profile) => this.userProfileSubject.next(profile),
@@ -65,7 +64,7 @@ refreshToken(): Observable<any> {
         localStorage.setItem('token', res.access);
       }
       if (res.refresh) {
-        localStorage.setItem('refresh_token', res.refresh); // درصورتی که بک‌اند refresh جدید هم بده
+        localStorage.setItem('refresh_token', res.refresh); 
       }
     })
   );

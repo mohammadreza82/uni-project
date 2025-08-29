@@ -31,7 +31,6 @@ export class CoursesComponent implements OnInit {
     this.courseService.getCourses().subscribe({
       next: (res) => {
         this.isLoading = false;
-        // فرض: آرایه دوره‌ها، فیلد reserved و reservationId رو اضافه می‌کنیم
         this.courses = res.map((course: any) => ({
           ...course,
           reserved: false,

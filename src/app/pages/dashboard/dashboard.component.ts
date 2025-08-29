@@ -40,7 +40,6 @@ export class DashboardComponent implements OnInit {
         this.foodReservations = res.food_reservations.map((f: any) => ({ ...f, reserved: true }));
         this.courseReservations = res.course_reservations.map((c: any) => ({ ...c, reserved: true }));
 
-        // آپدیت کیف پول
         if (this.user.amount !== undefined) {
           this.profileService.updateAmount(this.user.amount);
         }

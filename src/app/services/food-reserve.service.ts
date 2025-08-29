@@ -26,7 +26,7 @@ export class FoodReserveService {
     return this.http.post(url, {}, { headers: this.getAuthHeaders() }).pipe(
       tap((res: any) => {
         if (res.new_amount !== undefined) {
-          this.profileService.updateAmount(res.new_amount); // ← اینجا اپدیت می‌کنیم
+          this.profileService.updateAmount(res.new_amount); 
         }
       })
     );
@@ -37,7 +37,7 @@ export class FoodReserveService {
     return this.http.post(url, {}, { headers: this.getAuthHeaders() }).pipe(
       tap((res: any) => {
         if (res.new_amount !== undefined) {
-          this.profileService.updateAmount(res.new_amount); // ← اینجا هم اپدیت
+          this.profileService.updateAmount(res.new_amount); 
         }
       })
     );

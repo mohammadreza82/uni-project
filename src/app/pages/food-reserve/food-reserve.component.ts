@@ -87,7 +87,6 @@ export class FoodReserveComponent implements OnInit {
     });
   }
 
-  // متد جدید برای دریافت ایموجی مناسب بر اساس دسته‌بندی غذا
   getFoodEmoji(category: string): string {
     const emojiMap: {[key: string]: string} = {
       'Pizza': '🍕',

@@ -11,7 +11,7 @@
     [nzCollapsedWidth]="isMobile ? 0 : 80"
   >
     <div
-      class="sidebar-logo "
+      class="sidebar-logo"
       [ngStyle]="{
         'background-color': themeService.isDarkMode() ? '#001529' : '#ffffff'
       }"
@@ -40,34 +40,31 @@
               >Overview</a
             >
           </li>
-          <!-- <li nz-menu-item nzMatchRouter>
-          <a routerLink="/analytics" routerLinkActive="ant-menu-item-selected">Analytics</a>
-        </li> -->
         </ul>
       </li>
 
       <li nz-menu-item nzMatchRouter>
-    <a routerLink="/deposit" routerLinkActive="ant-menu-item-selected">
-      <span nz-icon nzType="dollar" nzTheme="outline"></span>
-      <span>Deposit</span>
-    </a>
-  </li>
+        <a routerLink="/deposit" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="dollar" nzTheme="outline"></span>
+          <span>Deposit</span>
+        </a>
+      </li>
 
-  <!-- Food Reserve -->
-  <li nz-menu-item nzMatchRouter>
-    <a routerLink="/food-reserve" routerLinkActive="ant-menu-item-selected">
-      <span nz-icon nzType="rest" nzTheme="outline"></span>
-      <span>Food Reserve</span>
-    </a>
-  </li>
+      <!-- Food Reserve -->
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/food-reserve" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="rest" nzTheme="outline"></span>
+          <span>Food Reserve</span>
+        </a>
+      </li>
 
-  <!-- Courses -->
-  <li nz-menu-item nzMatchRouter>
-    <a routerLink="/courses" routerLinkActive="ant-menu-item-selected">
-      <span nz-icon nzType="read" nzTheme="outline"></span>
-      <span>Courses</span>
-    </a>
-  </li>
+      <!-- Courses -->
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/courses" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="read" nzTheme="outline"></span>
+          <span>Courses</span>
+        </a>
+      </li>
 
       <!-- Settings -->
       <li nz-submenu nzTitle="Settings" nzIcon="setting">

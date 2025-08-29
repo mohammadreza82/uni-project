@@ -91,19 +91,16 @@ export class AuthPageComponent {
     this.registerForm.profileimg = null;
   }
 
-  // Open Profile Picture Modal
   addProfile() {
     this.modal.toggleModal('addProfilePicture');
   }
 
-  // Save Profile Picture (when modal is confirmed)
   profilePicSave(confirmed: boolean) {
     if (confirmed && this.registerForm.profileimg) {
       this.message.show('success', 'Profile picture saved successfully!');
     }
   }
 
-  // Submit Full Registration Form
   submitRegisterForm(): void {
     const { username, password, email, profileimg } = this.registerForm;
 

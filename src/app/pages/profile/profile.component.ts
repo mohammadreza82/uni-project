@@ -61,7 +61,6 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.loadProfileData();
 
-    // subscribe to user info updates
     this.profileService.userInfo$.subscribe((user) => {
       if (user) {
         this.profileData = user;
@@ -94,7 +93,7 @@ export class ProfileComponent implements OnInit {
         console.log('Raw response:', response);
 
         try {
-          const data = JSON.parse(response); // if JSON
+          const data = JSON.parse(response);
           this.profileData = data;
           this.amount = parseFloat(data.amount) || 0;
           this.profileForm.patchValue({
@@ -125,7 +124,7 @@ export class ProfileComponent implements OnInit {
 
       const reader = new FileReader();
       reader.onload = () => {
-        this.profileData.profile_image = reader.result as string; // only for preview
+        this.profileData.profile_image = reader.result as string; 
       };
       reader.readAsDataURL(file);
     }
@@ -148,7 +147,6 @@ export class ProfileComponent implements OnInit {
           this.profileData = response;
           this.amount = parseFloat(response.amount) || 0;
 
-          // update BehaviorSubject
           this.profileService.loadUserProfile();
 
           this.isLoading = false;

@@ -18,20 +18,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // Try refreshing token
-       return authService.refreshToken().pipe(
-  switchMap((res) => {
-    const newToken = authService.getToken();
-    const retryReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${newToken}` },
-    });
-    return next(retryReq);
-  }),
-  catchError((refreshError) => {
-    authService.logOut();
-    return throwError(() => refreshError);
-  })
-);
+          return authService.refreshToken().pipe(
+            switchMap((res) => {
+              const newToken = authService.getToken();
+              const retryReq = req.clone({
+                setHeaders: { Authorization: `Bearer ${newToken}` },
+              });
+              return next(retryReq);
+            }),
+            catchError((refreshError) => {
+              authService.logOut();
+              return throwError(() => refreshError);
+            })
+          );
 
         }
         return throwError(() => error);
