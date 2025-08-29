@@ -64,9 +64,13 @@ export class ProfileService {
     });
   }
 
-  updateProfile(profileData: any): Observable<any> {
-    return this.http.put(this.API_UPDATE_PROFILE, profileData);
-  }
+updateProfile(profileData: FormData): Observable<any> {
+  return this.http.put(this.API_UPDATE_PROFILE, profileData, {
+    headers: this.getAuthHeaders()  // فقط هدر توکن
+    // دقت کن: Content-Type رو عمداً نمی‌زنیم
+  });
+}
+
 
   changePassword(passwordData: any): Observable<any> {
     return this.http.post(this.API_CHANGE_PASSWORD, passwordData, { headers: this.getAuthHeaders() });

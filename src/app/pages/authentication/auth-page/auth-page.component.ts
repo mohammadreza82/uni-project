@@ -95,7 +95,7 @@ export class AuthPageComponent {
   addProfile() {
     this.modal.toggleModal('addProfilePicture');
   }
-  
+
   // Save Profile Picture (when modal is confirmed)
   profilePicSave(confirmed: boolean) {
     if (confirmed && this.registerForm.profileimg) {
@@ -114,54 +114,46 @@ export class AuthPageComponent {
 
     this.loading = true;
 
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('email', email);
+
     if (profileimg) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Image = reader.result as string;
-
-        const payload = {
-          username,
-          password,
-          email,
-          profileimg: base64Image 
-        };
-
-        this.sendRegister(payload);
-      };
-      reader.readAsDataURL(profileimg);
-    } else {
-      const payload = { username, password, email };
-      this.sendRegister(payload);
+      formData.append('profile_image', profileimg);
     }
+
+    this.sendRegister(formData);
   }
 
-  private sendRegister(payload: any) {
-    console.log('📤 Sending JSON:', payload);
+  private sendRegister(formData: FormData) {
+    console.log('📤 Sending FormData:');
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
 
-    this.authService.register(payload).subscribe({
+    this.authService.register(formData).subscribe({
       next: (res) => {
         console.log('✅ Server response:', res);
         this.message.show('success', 'Registration successful!');
         this.loading = false;
 
-        if (res.access && res.refresh) {
-          localStorage.setItem('access_token', res.access);
-          localStorage.setItem('refresh_token', res.refresh);
-        }
+        this.LoginData.username = this.registerForm.username;
+        this.LoginData.password = this.registerForm.password;
 
         this.isActive = false;
-        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.log('❌ Error:', err);
-        
         const errorMessage = this.getErrorMessage(err);
         this.message.show('error', errorMessage);
-        
         this.loading = false;
       },
     });
   }
+
+
+
 
   // Login
   handleLogin() {
@@ -178,22 +170,22 @@ export class AuthPageComponent {
         this.isLoading = false;
         if (response) {
           console.log('Login successful, received response:', response);
-          
+
           if (response.access && response.refresh) {
             localStorage.setItem('access_token', response.access);
             localStorage.setItem('refresh_token', response.refresh);
           }
-          
+
           this.message.show('success', 'Login successful!');
           this.router.navigate(['/dashboard']);
         }
       },
       error: (err) => {
         console.log('❌ Login error:', err);
-        
+
         const errorMessage = this.getErrorMessage(err);
         this.message.show('error', errorMessage);
-        
+
         this.isLoading = false;
       }
     });
@@ -204,66 +196,66 @@ export class AuthPageComponent {
       if (error.error.detail) {
         return error.error.detail;
       }
-      
+
       if (error.error.username) {
-        return Array.isArray(error.error.username) 
-          ? error.error.username.join(', ') 
+        return Array.isArray(error.error.username)
+          ? error.error.username.join(', ')
           : error.error.username;
       }
-      
+
       if (error.error.email) {
-        return Array.isArray(error.error.email) 
-          ? error.error.email.join(', ') 
+        return Array.isArray(error.error.email)
+          ? error.error.email.join(', ')
           : error.error.email;
       }
-      
+
       if (error.error.password) {
-        return Array.isArray(error.error.password) 
-          ? error.error.password.join(', ') 
+        return Array.isArray(error.error.password)
+          ? error.error.password.join(', ')
           : error.error.password;
       }
-      
+
       if (error.error.error && typeof error.error.error === 'string') {
         return error.error.error;
       }
-      
+
       if (Array.isArray(error.error) && error.error.length > 0) {
         return error.error[0];
       }
-      
+
       if (error.error.message) {
         return error.error.message;
       }
-      
+
       if (typeof error.error === 'string') {
         return error.error;
       }
     }
-    
+
     if (error.status === 0) {
       return 'Network error: Please check your internet connection';
     }
-    
+
     if (error.status === 400) {
       return 'Bad request: Please check your input data';
     }
-    
+
     if (error.status === 401) {
       return 'Unauthorized: Invalid credentials';
     }
-    
+
     if (error.status === 403) {
       return 'Forbidden: Access denied';
     }
-    
+
     if (error.status === 404) {
       return 'Not found: The requested resource was not found';
     }
-    
+
     if (error.status >= 500) {
       return 'Server error: Please try again later';
     }
-    
+
     return 'An unexpected error occurred. Please try again.';
   }
 }

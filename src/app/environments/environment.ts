@@ -35,4 +35,3 @@ export const environment = {
   },
 };
 
-// /api/students/foods/
